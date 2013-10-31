@@ -1,0 +1,64 @@
+--
+-- Definition of procedure "AddKeyword"
+--
+
+DROP PROCEDURE IF EXISTS `AddKeyword`;
+
+DELIMITER $$
+
+/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='' */ $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddKeyword`(IN p_keyword VARCHAR(30), IN p_weight INTEGER)
+BEGIN
+
+DECLARE v_cnt BIGINT(20);
+DECLARE v_wt integer;
+DECLARE sum INTEGER;
+
+select count(*) into v_cnt from webcrawler.tags where keyword like p_keyword;
+
+if v_cnt >= 1 then
+	select weight into v_wt from `webcrawler`.`tags` where keyword like p_keyword;
+	set sum = v_wt + p_weight;
+	UPDATE `webcrawler`.`tags` set weight=sum where keyword like p_keyword;
+else
+	INSERT INTO `webcrawler`.`tags`(keyword,weight) values(p_keyword,p_weight);
+end if;
+
+
+END $$
+/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
+
+DELIMITER ;
+
+--
+-- Definition of procedure "ProcInsertPageContent"
+--
+
+DROP PROCEDURE IF EXISTS `ProcInsertPageContent`;
+
+DELIMITER $$
+
+/*!50003 SET @TEMP_SQL_MODE=@@SQL_MODE, SQL_MODE='' */ $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ProcInsertPageContent`(IN p_url VARCHAR(256), IN p_text VARCHAR(4096))
+BEGIN
+DECLARE v_id BIGINT(20);
+
+select link_id into v_id from `webcrawler`.`links` where url like p_url;
+insert into `webcrawler`.`page_content`(url_id,text) values(v_id,p_text);
+
+
+
+END $$
+/*!50003 SET SESSION SQL_MODE=@TEMP_SQL_MODE */  $$
+
+DELIMITER ;
+
+
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
